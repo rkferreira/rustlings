@@ -7,12 +7,18 @@
 // pass! Make the test fail!
 // Execute `rustlings hint tests1` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
+
+fn test_assert() -> &'static str {
+    "OK"
+}
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn you_can_assert() {
-        assert!();
+        assert_eq!(test_assert(), "OK");
+        assert!(true);
     }
 }
