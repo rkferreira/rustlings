@@ -8,6 +8,8 @@
 
 use std::num::ParseIntError;
 use std::str::FromStr;
+use std::fmt::Display;
+use std::fmt::Debug;
 
 #[derive(Debug, PartialEq)]
 struct Person {
@@ -28,7 +30,6 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -43,10 +44,58 @@ enum ParsePersonError {
 // As an aside: `Box<dyn Error>` implements `From<&'_ str>`. This means that if you want to return a
 // string error message, you can do so via just using return `Err("my error message".into())`.
 
+impl From<ParseIntError> for ParsePersonError {
+    fn from(err: ParseIntError) -> ParsePersonError {
+        ParsePersonError::ParseInt(err)
+    }
+}
+
+impl Display for ParsePersonError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ParsePersonError::ParseInt(..) => 
+                write!(f, "Parse Int Error"),
+            _ => 
+                write!(f, "err"),
+        }
+    }
+}
+
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
-    }
+        if s.len() == 0 {
+            return Err(ParsePersonError::Empty);
+        }
+
+        let mut s_split = s.split(",");
+        let mut s_vec: Vec<&str> = s_split.by_ref().collect();
+
+        if s_vec.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        let mut s_name: String;
+        let mut s_age: usize = 0;
+
+        if let Some(x) = Some(s_vec[0]) {
+            if x.len() < 1 {
+                return Err(ParsePersonError::NoName);
+            }
+                s_name = x.to_string();
+        } else {
+            return Err(ParsePersonError::NoName);
+        }
+
+        if let Some(x) = Some(s_vec[1]) {
+            match x.parse::<usize>() {
+                    Ok(y) => s_age = y,
+                    Err(y) => return Err(ParsePersonError::ParseInt(y)),
+            };
+        } 
+
+        Ok(Person { name: s_name, age: s_age })
+    } 
 }
 
 fn main() {
